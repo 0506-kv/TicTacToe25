@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
 import Navbar from '../components/Navbar';
 
@@ -41,18 +41,14 @@ const Dashboard = () => {
             <div className="container mx-auto p-6">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                     <h1 className="text-2xl font-bold mb-6">Welcome to your dashboard, {user?.username}!</h1>
-                    <p className="mb-4">This is your TicTacToe25 dashboard. Here you can:</p>
-                    <ul className="list-disc pl-6 mb-6">
-                        <li>Start a new game</li>
-                        <li>View your game history</li>
-                        <li>Connect with friends</li>
-                    </ul>
-
-                    <div className="bg-blue-100 p-4 rounded-lg">
-                        <h2 className="text-xl font-semibold mb-2">Ready to play?</h2>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                            Start New Game
-                        </button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-green-100 p-4 rounded-lg">
+                            <h2 className="text-xl font-semibold mb-2">Track your finances</h2>
+                            <Link to="/expenses" className="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                                Expense Tracker
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

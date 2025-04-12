@@ -20,17 +20,26 @@ const Navbar = () => {
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-xl font-bold">TicTacToe25</Link>
 
+                <div className="hidden md:flex space-x-6">
+                    {user && (
+                        <>
+                            <Link to="/dashboard" className="hover:text-gray-300">Dashboard</Link>
+                            <Link to="/expenses" className="hover:text-gray-300">Expense Tracker</Link>
+                        </>
+                    )}
+                </div>
+
                 <div className="space-x-4">
                     {user ? (
-                        <>
-                            <span className="mr-2">Welcome, {user.username}</span>
+                        <div className="flex items-center space-x-4">
+                            <span className="mr-2 hidden md:inline">Welcome, {user.username}</span>
                             <button
                                 onClick={handleLogout}
                                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
                             >
                                 Logout
                             </button>
-                        </>
+                        </div>
                     ) : (
                         <>
                             <Link to="/login" className="hover:text-gray-300">Login</Link>

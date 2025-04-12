@@ -45,3 +45,30 @@ export const authService = {
         return await api.get('/users/profile');
     }
 };
+
+export const expenseService = {
+    getExpenses: async (filters = {}) => {
+        const queryParams = new URLSearchParams();
+        if (filters.startDate) queryParams.append('startDate', filters.startDate);
+        if (filters.endDate) queryParams.append('endDate', filters.endDate);
+        if (filters.category) queryParams.append('category', filters.category);
+
+        return await api.get(`/expenses?${queryParams.toString()}`);
+    },
+
+    getExpenseById: async (id) => {
+        return await api.get(`/expenses/${id}`);
+    },
+
+    createExpense: async (expenseData) => {
+        return await api.post('/expenses', expenseData);
+    },
+
+    updateExpense: async (id, expenseData) => {
+        return await api.put(`/expenses/${id}`, expenseData);
+    },
+
+    deleteExpense: async (id) => {
+        return await api.delete(`/expenses/${id}`);
+    }
+};

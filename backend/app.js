@@ -10,7 +10,7 @@ const connectToDb = require('./db/db');
 
 //ALL ROUTES
 const userRoutes = require('./routes/user.routes');
-
+const expenseRoutes = require('./routes/expense.routes');  // Add this line
 
 
 connectToDb();
@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
 
 
 app.use('/users', userRoutes);
+app.use('/expenses', expenseRoutes);  // Add this line
 
 
 module.exports = app;
