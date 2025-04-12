@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
-import ExpenseCategoryChart from '../components/ExpenseCategoryChart'; // Import the new component
+import ExpenseCategoryChart from '../components/ExpenseCategoryChart';
+import CalendarView from '../components/CalendarView';
 import { expenseService } from '../services/api';
 
 const CATEGORIES = [
@@ -23,8 +24,8 @@ const ExpenseTracker = () => {
         startDate: '',
         endDate: ''
     });
-    // New state for toggling between chart and list views on mobile
-    const [activeView, setActiveView] = useState('list'); // 'list' or 'chart'
+    // View states: 'list', 'chart', or 'calendar'
+    const [activeView, setActiveView] = useState('list');
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -163,11 +164,11 @@ const ExpenseTracker = () => {
                             </p>
                         </div>
 
-                        {/* View Toggle for Mobile (only visible on small screens) */}
-                        <div className="md:hidden bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between">
+                        {/* View Toggle - Updated to include Calendar View */}
+                        <div className="md:col-span-2 bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between">
                             <button 
                                 onClick={() => setActiveView('list')}
-                                className={`px-4 py-2 rounded-md flex-1 mr-2 ${activeView === 'list' 
+                                className={`px-4 py-2 rounded-md ${activeView === 'list' 
                                     ? 'bg-blue-600 text-white' 
                                     : 'bg-gray-200 text-gray-700'}`}
                             >
@@ -175,90 +176,111 @@ const ExpenseTracker = () => {
                             </button>
                             <button 
                                 onClick={() => setActiveView('chart')}
-                                className={`px-4 py-2 rounded-md flex-1 ${activeView === 'chart' 
+                                className={`px-4 py-2 rounded-md ${activeView === 'chart' 
                                     ? 'bg-blue-600 text-white' 
                                     : 'bg-gray-200 text-gray-700'}`}
                             >
                                 Chart View
                             </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">Filters</h2>
-                            <button
-                                onClick={handleClearFilters}
-                                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm font-medium flex items-center"
+                            <button 
+                                onClick={() => setActiveView('calendar')}
+                                className={`px-4 py-2 rounded-md ${activeView === 'calendar' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-gray-200 text-gray-700'}`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Clear Filters
+                                Calendar View
                             </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Category</label>
-                                <select
-                                    name="category"
-                                    value={filters.category}
-                                    onChange={handleFilterChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    </div>
+
+                    {activeView !== 'calendar' && (
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-lg font-semibold">Filters</h2>
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm font-medium flex items-center"
                                 >
-                                    {CATEGORIES.map(category => (
-                                        <option key={category} value={category}>
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Clear Filters
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={filters.startDate}
-                                    onChange={handleFilterChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">End Date</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={filters.endDate}
-                                    onChange={handleFilterChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                                    <select
+                                        name="category"
+                                        value={filters.category}
+                                        onChange={handleFilterChange}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        {CATEGORIES.map(category => (
+                                            <option key={category} value={category}>
+                                                {category.charAt(0).toUpperCase() + category.slice(1)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                                    <input
+                                        type="date"
+                                        name="startDate"
+                                        value={filters.startDate}
+                                        onChange={handleFilterChange}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">End Date</label>
+                                    <input
+                                        type="date"
+                                        name="endDate"
+                                        value={filters.endDate}
+                                        onChange={handleFilterChange}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Responsive grid layout for chart and table */}
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                        {/* Chart Section - Always visible on desktop, conditionally on mobile */}
-                        <div className={`lg:col-span-2 ${activeView === 'chart' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 lg:mb-0">
-                                <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
-                                <ExpenseCategoryChart expenses={expenses} />
-                                <p className="text-xs text-gray-500 text-center mt-4">
-                                    Hover over chart segments to see details
-                                </p>
-                            </div>
-                        </div>
+                    {/* Calendar View */}
+                    {activeView === 'calendar' && (
+                        <CalendarView />
+                    )}
 
-                        {/* Expense List - Always visible on desktop, conditionally on mobile */}
-                        <div className={`lg:col-span-3 ${activeView === 'list' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
-                            <ExpenseList
-                                expenses={expenses}
-                                loading={loading}
-                                onEdit={handleEditClick}
-                                onDelete={handleDeleteExpense}
-                            />
+                    {/* Chart and List View (only shown when not in calendar view) */}
+                    {activeView !== 'calendar' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            {/* Chart Section */}
+                            {activeView === 'chart' && (
+                                <div className="lg:col-span-2">
+                                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 lg:mb-0">
+                                        <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
+                                        <ExpenseCategoryChart expenses={expenses} />
+                                        <p className="text-xs text-gray-500 text-center mt-4">
+                                            Hover over chart segments to see details
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Expense List */}
+                            {activeView === 'list' && (
+                                <div className="lg:col-span-5">
+                                    <ExpenseList
+                                        expenses={expenses}
+                                        loading={loading}
+                                        onEdit={handleEditClick}
+                                        onDelete={handleDeleteExpense}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

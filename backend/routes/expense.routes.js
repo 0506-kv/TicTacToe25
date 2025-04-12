@@ -34,4 +34,7 @@ router.put('/:id', [
 // Delete expense
 router.delete('/:id', expenseController.deleteExpense);
 
+// Get expenses by month
+router.get('/month/:year/:month', expenseController.getExpensesByMonth);
+
 module.exports = router;

@@ -16,16 +16,58 @@ module.exports = {
         if (filters.startDate && filters.endDate) {
             query.date = {
                 $gte: new Date(filters.startDate),
-                $lte: new Date(filters.endDate)
+                $lte: new Date(new Date(filters.endDate).setHours(23, 59, 59, 999))
+            };
+        } else if (filters.startDate) {
+            query.date = { $gte: new Date(filters.startDate) };
+        } else if (filters.endDate) {
+            query.date = { $lte: new Date(new Date(filters.endDate).setHours(23, 59, 59, 999)) };
+        }
+
+        // Apply specific date filter if provided
+        if (filters.specificDate) {
+            const startOfDay = new Date(filters.specificDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            
+            const endOfDay = new Date(filters.specificDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            query.date = {
+                $gte: startOfDay,
+                $lte: endOfDay
             };
         }
 
         // Apply category filter if provided
-        if (filters.category) {
+        if (filters.category && filters.category !== 'all') {
             query.category = filters.category;
         }
 
         return await expenseModel.find(query).sort({ date: -1 });
+    },
+
+    // Get expenses grouped by day for a specific month
+    getExpensesByMonth: async (userId, year, month) => {
+        // Month is 0-indexed (0 = January, 11 = December)
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+        const expenses = await expenseModel.find({
+            userId,
+            date: { $gte: firstDay, $lte: lastDay }
+        }).sort({ date: 1 });
+
+        // Group expenses by day
+        const expensesByDay = {};
+        expenses.forEach(expense => {
+            const day = new Date(expense.date).getDate();
+            if (!expensesByDay[day]) {
+                expensesByDay[day] = [];
+            }
+            expensesByDay[day].push(expense);
+        });
+
+        return expensesByDay;
     },
 
     getExpenseById: async (expenseId, userId) => {

@@ -60,6 +60,10 @@ export const expenseService = {
         return await api.get(`/expenses/${id}`);
     },
 
+    getExpensesByMonth: async (year, month) => {
+        return await api.get(`/expenses/month/${year}/${month}`);
+    },
+    
     createExpense: async (expenseData) => {
         return await api.post('/expenses', expenseData);
     },

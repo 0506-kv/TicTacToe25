@@ -85,5 +85,25 @@ module.exports = {
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
-    }
+    },
+
+    getExpensesByMonth: async (req, res) => {
+        try {
+            const { year, month } = req.params;
+            
+            if (!year || !month) {
+                return res.status(400).json({ message: 'Year and month are required' });
+            }
+            
+            const expenses = await expenseService.getExpensesByMonth(
+                req.user._id,
+                parseInt(year),
+                parseInt(month) - 1 // Convert to 0-indexed month
+            );
+            
+            res.json(expenses);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
 };
