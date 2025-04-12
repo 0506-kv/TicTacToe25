@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
+import ExpenseCategoryChart from '../components/ExpenseCategoryChart'; // Import the new component
 import { expenseService } from '../services/api';
 
 const CATEGORIES = [
@@ -22,6 +23,8 @@ const ExpenseTracker = () => {
         startDate: '',
         endDate: ''
     });
+    // New state for toggling between chart and list views on mobile
+    const [activeView, setActiveView] = useState('list'); // 'list' or 'chart'
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -116,8 +119,8 @@ const ExpenseTracker = () => {
         <div className="min-h-screen bg-gray-100">
             <Navbar />
 
-            <div className="container mx-auto p-6 max-w-4xl">
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div className="container mx-auto p-4 md:p-6 max-w-5xl">
+                <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-6">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold">Expense Tracker</h1>
 
@@ -126,8 +129,11 @@ const ExpenseTracker = () => {
                                 setCurrentExpense(null);
                                 setShowForm(!showForm);
                             }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
                         >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                            </svg>
                             {showForm ? 'Cancel' : 'Add Expense'}
                         </button>
                     </div>
@@ -147,10 +153,35 @@ const ExpenseTracker = () => {
                         />
                     )}
 
-                    <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                        <h2 className="text-lg font-semibold mb-2">Summary</h2>
-                        <p className="text-2xl font-bold text-blue-700">${totalExpenses.toFixed(2)}</p>
-                        <p className="text-sm text-gray-600">Total Expenses</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        {/* Summary Card */}
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-sm border border-blue-200">
+                            <h2 className="text-lg font-semibold mb-2 text-blue-800">Total Expenses</h2>
+                            <p className="text-3xl font-bold text-blue-700">${totalExpenses.toFixed(2)}</p>
+                            <p className="text-sm text-blue-600 mt-1">
+                                {expenses.length} {expenses.length === 1 ? 'transaction' : 'transactions'}
+                            </p>
+                        </div>
+
+                        {/* View Toggle for Mobile (only visible on small screens) */}
+                        <div className="md:hidden bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between">
+                            <button 
+                                onClick={() => setActiveView('list')}
+                                className={`px-4 py-2 rounded-md flex-1 mr-2 ${activeView === 'list' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-gray-200 text-gray-700'}`}
+                            >
+                                List View
+                            </button>
+                            <button 
+                                onClick={() => setActiveView('chart')}
+                                className={`px-4 py-2 rounded-md flex-1 ${activeView === 'chart' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-gray-200 text-gray-700'}`}
+                            >
+                                Chart View
+                            </button>
+                        </div>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -205,12 +236,29 @@ const ExpenseTracker = () => {
                         </div>
                     </div>
 
-                    <ExpenseList
-                        expenses={expenses}
-                        loading={loading}
-                        onEdit={handleEditClick}
-                        onDelete={handleDeleteExpense}
-                    />
+                    {/* Responsive grid layout for chart and table */}
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        {/* Chart Section - Always visible on desktop, conditionally on mobile */}
+                        <div className={`lg:col-span-2 ${activeView === 'chart' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 lg:mb-0">
+                                <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
+                                <ExpenseCategoryChart expenses={expenses} />
+                                <p className="text-xs text-gray-500 text-center mt-4">
+                                    Hover over chart segments to see details
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Expense List - Always visible on desktop, conditionally on mobile */}
+                        <div className={`lg:col-span-3 ${activeView === 'list' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
+                            <ExpenseList
+                                expenses={expenses}
+                                loading={loading}
+                                onEdit={handleEditClick}
+                                onDelete={handleDeleteExpense}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
